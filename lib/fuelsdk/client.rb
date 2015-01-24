@@ -101,6 +101,13 @@ module FuelSDK
 			self.id = client_config["id"]
 			self.secret = client_config["secret"]
 			self.signature = client_config["signature"]
+
+			access_tokens = client_config['access_tokens'] if client_config.has_key?('access_tokens')
+			if access_tokens
+                          self.access_token = access_tokens['access_token']
+                          self.auth_token_expiration = access_tokens['auth_token_expiration']
+                          self.internal_token = access_tokens['internal_token']
+                        end
 			end
 
 			self.jwt = params['jwt'] if params['jwt']
