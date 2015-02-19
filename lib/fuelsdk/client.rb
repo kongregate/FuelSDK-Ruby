@@ -117,14 +117,17 @@ module FuelSDK
 				payload = Hash.new.tap do |h|
 					h['clientId']= id
 					h['clientSecret'] = secret
-					h['refreshToken'] = refresh_token if refresh_token
-					h['accessType'] = 'offline'
+
+                                        # Ticket 88728238: Per the documentation, the refreshToken is optional.
+                                        #                  Remove it as it seems to be expiring unexpectedly.
+                                        #h['refreshToken'] = refresh_token if refresh_token
+                                        #h['accessType'] = 'offline'
 				end
 
 				options = Hash.new.tap do |h|
 					h['data'] = payload
 					h['content_type'] = 'application/json'
-					h['params'] = {'legacy' => 1}
+                                        h['params'] = {'legacy' => 1}
 				end
 				response = post("https://auth.exacttargetapis.com/v1/requestToken", options)
 				raise "Unable to refresh token: #{response['message']}" unless response.has_key?('accessToken')
@@ -132,7 +135,11 @@ module FuelSDK
 				self.access_token = response['accessToken']
 				self.internal_token = response['legacyToken']
 				self.auth_token_expiration = Time.new + response['expiresIn']
-				self.refresh_token = response['refreshToken'] if response.has_key?("refreshToken")
+
+                                # Ticket 88728238: Per the documentation, the refreshToken is optional.
+                                #                  Don't store it, as passing it to the requestToken call
+                                #                  seems to cause issues.
+                                #self.refresh_token = response['refreshToken'] if response.has_key?("refreshToken")
 				return true
 				else 
 				return false
